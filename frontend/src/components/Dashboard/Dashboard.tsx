@@ -174,15 +174,17 @@ export const Dashboard: FC = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {featuredMovie && (
-          <FeaturedMovie
-            movie={featuredMovie}
-            onPlayClick={handlePlayClick}
-            onInfoClick={handleInfoClick}
-          />
-        )}
+      {/* Featured Movie - Full Width */}
+      {featuredMovie && (
+        <FeaturedMovie
+          movie={featuredMovie}
+          onPlayClick={handlePlayClick}
+          onInfoClick={handleInfoClick}
+        />
+      )}
 
+      {/* Movie Categories - Constrained Width */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {categories && Object.entries(categories).map(([categoryName, movies]) => (
           <section key={categoryName} className="mb-12">
             <h2 className="text-2xl font-bold mb-6 text-white">{categoryName}</h2>

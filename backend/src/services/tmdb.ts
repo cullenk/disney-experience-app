@@ -33,6 +33,8 @@ interface Movie {
   description: string
   imageUrl: string
   backdropUrl?: string
+  videoUrl?: string
+  trailerUrl?: string
   genre: string[]
   releaseYear: number
   rating: string
@@ -69,10 +71,25 @@ class TMDBService {
       description: tmdbMovie.overview || 'No description available',
       imageUrl: this.formatImageUrl(tmdbMovie.poster_path, POSTER_SIZE),
       backdropUrl: this.formatImageUrl(tmdbMovie.backdrop_path, BACKDROP_SIZE),
+      trailerUrl: this.getTrailerUrl(tmdbMovie.title, tmdbMovie.id),
       genre: this.mapGenreIds(tmdbMovie.genre_ids),
       releaseYear: new Date(tmdbMovie.release_date || '2000').getFullYear(),
       rating: tmdbMovie.adult ? 'R' : 'PG'
     }
+  }
+
+  // For demo purposes - in production, this would fetch from TMDB videos endpoint
+  private getTrailerUrl(title: string, tmdbId: number): string | undefined {
+    // Sample video URLs for demo - in production, you'd call TMDB /movie/{id}/videos endpoint
+    const demoTrailers: Record<string, string> = {
+      'Avengers: Endgame': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'The Lion King': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'Frozen II': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'Spider-Man: No Way Home': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      'Black Panther': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4'
+    }
+    
+    return demoTrailers[title] || demoTrailers['Avengers: Endgame'] // Default trailer
   }
 
   private mapGenreIds(genreIds: number[]): string[] {
@@ -153,19 +170,19 @@ class TMDBService {
   // Fallback data when API is unavailable
   private getFallbackDisneyMovies(): Movie[] {
     return [
-      { id: '1', tmdbId: 1, title: 'Encanto', description: 'A magical family story', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Encanto', genre: ['Animation', 'Family'], releaseYear: 2021, rating: 'PG' },
-      { id: '2', tmdbId: 2, title: 'Frozen II', description: 'Elsa\'s adventure continues', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Frozen+II', genre: ['Animation', 'Family'], releaseYear: 2019, rating: 'PG' },
-      { id: '3', tmdbId: 3, title: 'Moana', description: 'A Polynesian adventure', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Moana', genre: ['Animation', 'Family'], releaseYear: 2016, rating: 'PG' },
+      { id: '1', tmdbId: 1, title: 'Encanto', description: 'A magical family story', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Encanto', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', genre: ['Animation', 'Family'], releaseYear: 2021, rating: 'PG' },
+      { id: '2', tmdbId: 2, title: 'Frozen II', description: 'Elsa\'s adventure continues', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Frozen+II', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', genre: ['Animation', 'Family'], releaseYear: 2019, rating: 'PG' },
+      { id: '3', tmdbId: 3, title: 'Moana', description: 'A Polynesian adventure', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Moana', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', genre: ['Animation', 'Family'], releaseYear: 2016, rating: 'PG' },
       { id: '4', tmdbId: 4, title: 'Soul', description: 'A musical journey of self-discovery', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Soul', genre: ['Animation', 'Drama'], releaseYear: 2020, rating: 'PG' }
     ]
   }
 
   private getFallbackMarvelMovies(): Movie[] {
     return [
-      { id: '5', tmdbId: 5, title: 'Spider-Man: No Way Home', description: 'The multiverse unleashed', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Spider-Man', genre: ['Action', 'Adventure'], releaseYear: 2021, rating: 'PG-13' },
-      { id: '6', tmdbId: 6, title: 'Black Panther', description: 'Wakanda forever', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Black+Panther', genre: ['Action', 'Adventure'], releaseYear: 2018, rating: 'PG-13' },
-      { id: '7', tmdbId: 7, title: 'Avengers: Endgame', description: 'The epic conclusion', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Avengers', genre: ['Action', 'Adventure'], releaseYear: 2019, rating: 'PG-13' },
-      { id: '8', tmdbId: 8, title: 'Iron Man', description: 'The beginning of the MCU', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Iron+Man', genre: ['Action', 'Adventure'], releaseYear: 2008, rating: 'PG-13' }
+      { id: '5', tmdbId: 5, title: 'Spider-Man: No Way Home', description: 'The multiverse unleashed', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Spider-Man', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', genre: ['Action', 'Adventure'], releaseYear: 2021, rating: 'PG-13' },
+      { id: '6', tmdbId: 6, title: 'Black Panther', description: 'Wakanda forever', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Black+Panther', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', genre: ['Action', 'Adventure'], releaseYear: 2018, rating: 'PG-13' },
+      { id: '7', tmdbId: 7, title: 'Avengers: Endgame', description: 'The epic conclusion', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Avengers', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', genre: ['Action', 'Adventure'], releaseYear: 2019, rating: 'PG-13' },
+      { id: '8', tmdbId: 8, title: 'Iron Man', description: 'The beginning of the MCU', imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=Iron+Man', trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', genre: ['Action', 'Adventure'], releaseYear: 2008, rating: 'PG-13' }
     ]
   }
 
@@ -177,6 +194,7 @@ class TMDBService {
       description: 'A young mermaid dreams of life on land in this beloved Disney classic reimagined for a new generation.',
       imageUrl: 'https://via.placeholder.com/500x750/0a0e27/ffffff?text=The+Little+Mermaid',
       backdropUrl: 'https://via.placeholder.com/1280x720/0a0e27/ffffff?text=The+Little+Mermaid',
+      trailerUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
       genre: ['Animation', 'Family', 'Fantasy'],
       releaseYear: 2023,
       rating: 'PG'

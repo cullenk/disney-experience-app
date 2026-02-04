@@ -5,6 +5,8 @@ export interface Movie {
   description: string
   imageUrl: string
   backdropUrl?: string
+  videoUrl?: string
+  trailerUrl?: string
   genre: string[]
   releaseYear: number
   rating: string
