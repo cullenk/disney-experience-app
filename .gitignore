@@ -1,0 +1,66 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+*/node_modules
+
+# Build outputs
+dist
+dist-ssr
+build
+*/dist
+*/build
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+*/.env
+*/.env.local
+
+# Database
+*.db
+*.sqlite
+prisma/migrations/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/settings.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+Thumbs.db
+Icon?
+
+# Coverage directory used by tools like istanbul
+coverage
+*/coverage
+
+# nyc test coverage
+.nyc_output
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
