@@ -1,12 +1,22 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { FC } from 'react'
 import { useAuth } from '../../contexts/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Play, Plus, User } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
+import { movieService } from '../../services/movieService'
+import FeaturedMovie from '../FeaturedMovie/FeaturedMovie'
+import MovieCard from '../MovieCard/MovieCard'
+import type { Movie, MovieCategories } from '../../types/movie'
 
 export const Dashboard: FC = () => {
   const { user, logout, loading } = useAuth()
   const navigate = useNavigate()
+  
+  // Movie state
+  const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null)
+  const [categories, setCategories] = useState<MovieCategories | null>(null)
+  const [moviesLoading, setMoviesLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -14,9 +24,52 @@ export const Dashboard: FC = () => {
     }
   }, [user, loading, navigate])
 
+  // Fetch movie data
+  useEffect(() => {
+    const fetchMovieData = async () => {
+      if (!user) return
+
+      try {
+        setMoviesLoading(true)
+        setError(null)
+
+        // Fetch featured movie and categories in parallel
+        const [featured, movieCategories] = await Promise.all([
+          movieService.getFeaturedMovie(),
+          movieService.getMovieCategories()
+        ])
+
+        setFeaturedMovie(featured)
+        setCategories(movieCategories)
+      } catch (err) {
+        console.error('Failed to fetch movie data:', err)
+        setError('Failed to load movies. Please try again later.')
+      } finally {
+        setMoviesLoading(false)
+      }
+    }
+
+    fetchMovieData()
+  }, [user])
+
   const handleLogout = () => {
     logout()
     navigate('/login')
+  }
+
+  const handleMovieClick = (movie: Movie) => {
+    console.log('Movie clicked:', movie)
+    // TODO: Implement movie details modal or navigation
+  }
+
+  const handlePlayClick = (movie: Movie) => {
+    console.log('Play clicked for:', movie)
+    // TODO: Implement video player
+  }
+
+  const handleInfoClick = (movie: Movie) => {
+    console.log('Info clicked for:', movie)
+    // TODO: Implement movie details modal
   }
 
   if (loading) {
@@ -31,41 +84,70 @@ export const Dashboard: FC = () => {
     return null
   }
 
-  // Mock movie data for demonstration
-  const featuredMovie = {
-    title: "The Little Mermaid",
-    description: "A young mermaid dreams of life on land in this beloved Disney classic.",
-    image: "https://via.placeholder.com/1920x800/0a0e27/ffffff?text=The+Little+Mermaid"
+  // Loading state for movies
+  if (moviesLoading) {
+    return (
+      <div className="min-h-screen bg-disney-dark">
+        <header className="bg-disney-gray/80 backdrop-blur-sm border-b border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-8">
+                <h1 className="text-2xl font-bold text-disney-blue">Disney+</h1>
+                <nav className="hidden md:flex space-x-6">
+                  <a href="#" className="text-white hover:text-disney-blue transition-colors">Home</a>
+                  <a href="#" className="text-gray-300 hover:text-disney-blue transition-colors">Movies</a>
+                  <a href="#" className="text-gray-300 hover:text-disney-blue transition-colors">Series</a>
+                  <a href="#" className="text-gray-300 hover:text-disney-blue transition-colors">Watchlist</a>
+                </nav>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <User className="h-5 w-5 text-gray-300" />
+                  <span className="text-sm text-gray-300">{user.name}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="text-sm">Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-disney-blue mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading amazing content...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const categories = [
-    {
-      title: "Disney Originals",
-      movies: [
-        { title: "Encanto", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Encanto" },
-        { title: "Frozen II", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Frozen+II" },
-        { title: "Moana", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Moana" },
-        { title: "Soul", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Soul" },
-      ]
-    },
-    {
-      title: "Marvel",
-      movies: [
-        { title: "Spider-Man", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Spider-Man" },
-        { title: "Black Panther", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Black+Panther" },
-        { title: "The Avengers", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Avengers" },
-        { title: "Iron Man", image: "https://via.placeholder.com/300x450/0a0e27/ffffff?text=Iron+Man" },
-      ]
-    }
-  ]
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-disney-dark text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-disney-blue text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-disney-dark text-white">
-      {/* Header */}
       <header className="bg-disney-gray/80 backdrop-blur-sm border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold text-disney-blue">Disney+</h1>
               <nav className="hidden md:flex space-x-6">
@@ -75,8 +157,6 @@ export const Dashboard: FC = () => {
                 <a href="#" className="text-gray-300 hover:text-disney-blue transition-colors">Watchlist</a>
               </nav>
             </div>
-
-            {/* User Menu */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <User className="h-5 w-5 text-gray-300" />
@@ -94,46 +174,25 @@ export const Dashboard: FC = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative h-[70vh] bg-cover bg-center" style={{ backgroundImage: `url(${featuredMovie.image})` }}>
-        <div className="absolute inset-0 bg-gradient-to-t from-disney-dark via-black/40 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 p-8 max-w-2xl">
-          <h2 className="text-5xl font-bold mb-4">{featuredMovie.title}</h2>
-          <p className="text-lg text-gray-200 mb-6">{featuredMovie.description}</p>
-          <div className="flex space-x-4">
-            <button className="bg-white text-black px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 hover:bg-gray-200 transition-colors">
-              <Play className="h-5 w-5" fill="currentColor" />
-              <span>Play</span>
-            </button>
-            <button className="bg-gray-600/80 text-white px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 hover:bg-gray-600 transition-colors">
-              <Plus className="h-5 w-5" />
-              <span>Watchlist</span>
-            </button>
-          </div>
-        </div>
-      </section>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {featuredMovie && (
+          <FeaturedMovie
+            movie={featuredMovie}
+            onPlayClick={handlePlayClick}
+            onInfoClick={handleInfoClick}
+          />
+        )}
 
-      {/* Content Sections */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {categories.map((category, categoryIndex) => (
-          <section key={categoryIndex} className="mb-12">
-            <h3 className="text-2xl font-bold mb-6">{category.title}</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {category.movies.map((movie, movieIndex) => (
-                <div key={movieIndex} className="group cursor-pointer">
-                  <div className="relative overflow-hidden rounded-lg aspect-[2/3] bg-gray-800">
-                    <img
-                      src={movie.image}
-                      alt={movie.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 p-4">
-                        <h4 className="text-sm font-semibold">{movie.title}</h4>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        {categories && Object.entries(categories).map(([categoryName, movies]) => (
+          <section key={categoryName} className="mb-12">
+            <h2 className="text-2xl font-bold mb-6 text-white">{categoryName}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+              {movies.map((movie: Movie) => (
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={handleMovieClick}
+                />
               ))}
             </div>
           </section>
